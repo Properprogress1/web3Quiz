@@ -42,17 +42,31 @@ function WalletConnectionHook() {
     const initialChainId = await provider.request({ method: 'eth_chainId' });
     setChainId(initialChainId);
 
-    const web3 = new Web3(provider);
-    const accounts = await web3.eth.getAccounts();
-    setAccount(accounts[0]);
-    getBalance(accounts[0]);
+    
+    const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
+    setAccount(accounts);
+    getBalance(accounts);
   };
 
-  const getBalance = async (address) => {
-    const web3 = new Web3(window.ethereum);
-    const balance = await web3.eth.getBalance(address);
-    setBalance(web3.utils.fromWei(balance, 'ether'));
-  };
+  const getBalance = async () => {
+    if (!address) {
+        console.log("invalid address");
+        return;
+    }
+     try {
+        const provider = await new ethers.BrowserProvider(window.ethereum);
+        const balance = await provider.getBalance(address); 
+        console.log(balance);
+        
+        setBalance(ethers.formatEther(balance)); 
+     } catch (error) {
+           console.error("error getting balance", error);
+           setBalance(null);
+           
+     }   
+    }
+    
+  
 
   return {
     account,
@@ -63,7 +77,8 @@ function WalletConnectionHook() {
     setAddress,
     getBalance,
   };
-}
+
+};
 
 function WalletConnectionComponent() {
   const { account, chainId, isMetaMaskInstalled, balance, address, setAddress, getBalance } = WalletConnectionHook();
@@ -75,7 +90,7 @@ function WalletConnectionComponent() {
       <p className="text-base font-medium">Connected to MetaMask</p>
       <p className="text-base">Account: {account}</p>
       <p className="text-base">Chain ID: {chainId}</p>
-      <p className="text-base">Balance: {balance} ETH</p>
+      <p className="text-base">Balance:  {!balance ? "null": balance} ETH</p>
       <div className="flex items-center justify-between">
         <input
           type="text"
@@ -84,7 +99,7 @@ function WalletConnectionComponent() {
           className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
         <button
-          onClick={() => getBalance(address)}
+          onClick={getBalance}
           className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 focus:outline-none"
         >
           Get Balance
