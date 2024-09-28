@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { ethers } from 'ethers';
+import detectEthereumProvider from '@metamask/detect-provider';
+
 function WalletConnectionHook() {
   const [account, setAccount] = useState(null);
   const [chainId, setChainId] = useState(null);
@@ -66,20 +69,32 @@ function WalletConnectionComponent() {
   const { account, chainId, isMetaMaskInstalled, balance, address, setAddress, getBalance } = WalletConnectionHook();
 
   return (
-    <div>
-      {isMetaMaskInstalled ? (
-        <>
-          <p>Connected to MetaMask</p>
-          <p>Account: {account}</p>
-          <p>Chain ID: {chainId}</p>
-          <p>Balance: {balance} ETH</p>
-          <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
-          <button onClick={() => getBalance(address)}>Get Balance</button>
-        </>
-      ) : (
-        <p>Please install MetaMask</p>
-      )}
-    </div>
+    <div className="flex flex-col space-y-4 px-4 py-6 bg-white rounded-lg shadow-md">
+  {isMetaMaskInstalled ? (
+    <>
+      <p className="text-base font-medium">Connected to MetaMask</p>
+      <p className="text-base">Account: {account}</p>
+      <p className="text-base">Chain ID: {chainId}</p>
+      <p className="text-base">Balance: {balance} ETH</p>
+      <div className="flex items-center justify-between">
+        <input
+          type="text"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+        <button
+          onClick={() => getBalance(address)}
+          className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 focus:outline-none"
+        >
+          Get Balance
+        </button>
+      </div>
+    </>
+  ) : (
+    <p className="text-base">Please install MetaMask</p>
+  )}
+</div>
   );
 }
 
